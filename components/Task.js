@@ -125,7 +125,7 @@ export default class Task extends React.Component {
           minimumTrackTintColor={this.props.data.active ? main.blue : main.NA}
           thumbTintColor={this.props.data.active ? main.blue : main.NA}
           maximumValue={8 * 60}
-          step={1}
+          step={5}
           onSlidingComplete={value => {
             this.props.adjustTaskDuration(this.props.index, value);
           }}
