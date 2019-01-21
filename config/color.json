@@ -1,0 +1,12 @@
+{
+  "main": {
+    "high": "#FF0000",
+    "medium": "#FF9901",
+    "low": "#00B42D",
+    "information": "#35A3F7",
+    "blue": "#4356A9",
+    "offline": "#f5f5f5",
+    "orange": "#FB5B00",
+    "NA": "#919191"
+  },
+}
