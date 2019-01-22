@@ -48,6 +48,7 @@ export default class AppHeader extends React.Component {
           </Button>
         </Right>
 
+        {/* Task title input */}
         <Prompt
           title="Enter task"
           placeholder="Anything"

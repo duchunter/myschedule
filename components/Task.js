@@ -2,22 +2,33 @@
 // index (int)
 // data (obj)
 // active (bool)
-// deleteTask, toogleActive, adjustDuration (function)
+// deleteTask, toogleActive, adjustDuration, duplicateTask (function)
+// updateTimeLeft, setTarget (function)
 
 import React from 'react';
 import {
   Animated, Easing, StyleSheet, View, Platform, Slider, TouchableOpacity
 } from 'react-native';
 import { Text, Icon } from 'native-base';
+import Prompt from 'myschedule/custom/rn-prompt';
 import moment from 'moment';
 
 import font from 'myschedule/config/font';
 import { main } from 'myschedule/config/color';
 import { IS_IOS, WIDTH } from 'myschedule/config/constants';
 
+import getDuration from 'myschedule/utils/getDuration';
+import parseDuration from 'myschedule/utils/parseDuration';
+
 export default class Task extends React.Component {
   constructor(props) {
     super(props);
+
+    this.state = {
+      duration: 0,
+      activation: false,
+      showPrompt: false
+    }
 
     // Setup animation when select a card
     this._active = new Animated.Value(0);
@@ -54,6 +65,15 @@ export default class Task extends React.Component {
     };
   }
 
+  // Set initial duration
+  componentDidMount() {
+    let { duration, active } = this.props.data;
+    this.setState({
+      duration,
+      activation: active
+    });
+  }
+
   // Active animation if a card is selected or released
   componentWillReceiveProps(nextProps) {
     if (this.props.active !== nextProps.active) {
@@ -63,19 +83,6 @@ export default class Task extends React.Component {
         toValue: Number(nextProps.active),
       }).start();
     }
-  }
-
-  // Return duration string
-  getDuration = (duration) => {
-    if (duration == 0) {
-      return 'Inactive';
-    }
-
-    let hours = (duration / 60).toFixed(0);
-    let minutes = duration % 60;
-
-    return (hours != 0 ? hours + ' hours ' : '')
-      + (minutes ? minutes + ' minutes' : '');
   }
 
   render() {
@@ -93,6 +100,22 @@ export default class Task extends React.Component {
             </Text>
           </View>
 
+          {/* Specific duration input */}
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={() => this.setState({ showPrompt: true })}
+          >
+            <Icon name={'md-time'} style={{ fontSize: 16 }} />
+          </TouchableOpacity>
+
+          {/* Duplicate */}
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={this.props.duplicateTask}
+          >
+            <Icon name={'md-copy'} style={{ fontSize: 16 }} />
+          </TouchableOpacity>
+
           {/* Delete */}
           <TouchableOpacity
             style={styles.actionButton}
@@ -104,10 +127,16 @@ export default class Task extends React.Component {
           {/* Toogle */}
           <TouchableOpacity
             style={styles.actionButton}
-            onPress={this.props.toogleTask}
+            onPress={() => {
+              this.setState({
+                activation: !this.state.activation
+              });
+
+              this.props.toogleTask();
+            }}
           >
             <Icon
-              name={this.props.data.active ? 'ios-pause' : 'ios-play'}
+              name={this.state.activation ? 'ios-pause' : 'ios-play'}
               style={{ fontSize: 16 }}
             />
           </TouchableOpacity>
@@ -115,19 +144,42 @@ export default class Task extends React.Component {
 
         {/* Duration */}
         <Text style={styles.text}>
-          {this.getDuration(this.props.data.duration)}
+          {getDuration(this.state.duration)}
         </Text>
 
         {/* Slider */}
         <Slider
           style={styles.slider}
-          value={this.props.data.duration}
-          minimumTrackTintColor={this.props.data.active ? main.blue : main.NA}
-          thumbTintColor={this.props.data.active ? main.blue : main.NA}
-          maximumValue={8 * 60}
+          value={this.state.duration}
+          minimumTrackTintColor={this.state.activation ? main.blue : main.NA}
+          thumbTintColor={this.state.activation ? main.blue : main.NA}
+          maximumValue={3 * 60}
           step={5}
+          onValueChange={value => {
+            if (this.state.activation) {
+              this.props.updateTimeLeft(null, value - this.state.duration);
+            }
+
+            this.setState({ duration: value });
+          }}
           onSlidingComplete={value => {
             this.props.adjustTaskDuration(this.props.index, value);
+          }}
+        />
+
+        {/* Duration input */}
+        <Prompt
+          title="Enter duration"
+          placeholder="hh:ss"
+          visible={this.state.showPrompt}
+          onCancel={() => this.setState({ showPrompt: false })}
+          onSubmit={(value) => {
+            this.setState({ showPrompt: false });
+            let duration = parseDuration(value);
+            if (duration != -1) {
+              this.setState({ duration });
+              this.props.adjustTaskDuration(this.props.index, duration);
+            }
           }}
         />
       </Animated.View>

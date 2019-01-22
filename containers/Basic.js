@@ -31,15 +31,16 @@ export default class Basic extends React.Component {
   }
 
   // Add new task
-  addTask = (title) => {
+  addTask = (title, duration, active) => {
     let newTask = {
-      title,
-      duration: 0,
-      active: false
+      title: title || 'Slack',
+      duration: duration || 0,
+      active: active || false
     }
 
     let newData = [...this.state.data, newTask];
-    this.updateState(newData);
+    this.setState({ data: newData });
+    this.updateTimeLeft(newData);
     this.updateData(this.state.day, newData);
   }
 
@@ -47,7 +48,7 @@ export default class Basic extends React.Component {
   toogleTask = (index) => {
     let data = [...this.state.data];
     data[index].active = !data[index].active;
-    this.updateState(data);
+    this.updateTimeLeft(data);
     this.updateData(this.state.day, data);
   }
 
@@ -55,7 +56,8 @@ export default class Basic extends React.Component {
   deleteTask = (index) => {
     let data = [...this.state.data];
     data.splice(index, 1);
-    this.updateState(data);
+    this.setState({ data });
+    this.updateTimeLeft(data);
     this.updateData(this.state.day, data);
   }
 
@@ -63,7 +65,6 @@ export default class Basic extends React.Component {
   adjustTaskDuration = (index, duration) => {
     let data = [...this.state.data];
     data[index].duration = duration;
-    this.updateState(data);
     this.updateData(this.state.day, data);
   }
 
@@ -82,8 +83,7 @@ export default class Basic extends React.Component {
       return;
     }
 
-    this.setState({ newOrder: [] });
-    this.updateState(newData);
+    newOrder = [];
     this.updateData(this.state.day, newData);
   }
 
@@ -92,7 +92,10 @@ export default class Basic extends React.Component {
     try {
       let data = await getData(day);
       this.setState({ day });
-      setTimeout(() => this.updateState(data), 0);
+      setTimeout(() => {
+        this.setState({ data });
+        this.updateTimeLeft(data);
+      }, 0);
     } catch (e) {
       alert('You have bug(s)!');
     }
@@ -108,13 +111,19 @@ export default class Basic extends React.Component {
   }
 
   // Update current state
-  updateState = (data) => {
-    this.setState({
-      data,
-      total: data.reduce((sum, task) => (
+  updateTimeLeft = (data, value) => {
+    let total = this.state.total;
+    if (data) {
+      total = data.reduce((sum, task) => (
         sum + (task.active ? task.duration : 0)
-      ), 0)
-    });
+      ), 0);
+    }
+
+    if (value) {
+      total += value;
+    }
+
+    this.setState({ total });
   }
 
   render() {
@@ -153,6 +162,11 @@ export default class Basic extends React.Component {
                     deleteTask={() => this.deleteTask(key)}
                     toogleTask={() => this.toogleTask(key)}
                     adjustTaskDuration={this.adjustTaskDuration}
+                    updateTimeLeft={this.updateTimeLeft}
+                    duplicateTask={() => {
+                      let { title, duration, active } = data;
+                      this.addTask(title, duration, active);
+                    }}
                   />
                 )
               }}

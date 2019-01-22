@@ -19,7 +19,10 @@ export default class DrawerContent extends React.Component {
             <ListItem
               key={index}
               onPress={() => {
-                this.props.fetchData(index);
+                if (index != this.props.currentDay) {
+                  this.props.fetchData(index);
+                }
+
                 this.props.closeDrawer();
               }}
             >

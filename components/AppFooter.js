@@ -7,20 +7,9 @@ import { Footer, Text } from 'native-base';
 import { main } from 'myschedule/config/color';
 import font from 'myschedule/config/font';
 
+import getDuration from 'myschedule/utils/getDuration';
+
 export default class AppFooter extends React.Component {
-  // Return duration string
-  getDuration = (duration) => {
-    if (duration == 0) {
-      return 'Inactive';
-    }
-
-    let hours = (duration / 60).toFixed(0);
-    let minutes = duration % 60;
-
-    return (hours != 0 ? hours + ' hours ' : '')
-      + (minutes ? minutes + ' minutes' : '');
-  }
-
   render() {
     return (
       <Footer style={styles.container}>
@@ -36,7 +25,7 @@ export default class AppFooter extends React.Component {
 
         <View style={{ flex: 1 }}>
           <Text style={styles.text}>
-            {this.getDuration(this.props.timeLeft)}
+            {getDuration(this.props.timeLeft)}
           </Text>
         </View>
       </Footer>
