@@ -14,7 +14,7 @@ export default function parseDuration(str) {
   }
 
   hour = Math.max(0, hour);
-  hour = Math.min(hour, 2);
+  hour = Math.min(hour, 12);
   minute = Math.max(0, minute);
   minute = Math.min(minute, 59);
 

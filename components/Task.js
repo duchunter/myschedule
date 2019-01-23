@@ -153,8 +153,8 @@ export default class Task extends React.Component {
           value={this.state.duration}
           minimumTrackTintColor={this.state.activation ? main.blue : main.NA}
           thumbTintColor={this.state.activation ? main.blue : main.NA}
-          maximumValue={3 * 60}
-          step={5}
+          maximumValue={8 * 60}
+          step={15}
           onValueChange={value => {
             if (this.state.activation) {
               this.props.updateTimeLeft(null, value - this.state.duration);
